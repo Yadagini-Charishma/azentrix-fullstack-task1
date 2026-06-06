@@ -143,15 +143,18 @@ Available operations include:
 
 ### Dashboard
 
-(Add Screenshot)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/bbde6b63-1d06-47f2-b4cd-211cf259f0b5" />
+
 
 ### Expense List
 
-(Add Screenshot)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ca496c74-8031-4668-a694-e2a733d94f71" />
+
 
 ### Add Expense Form
 
-(Add Screenshot)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/fffdcb45-5d8e-4420-9105-5bd18a9f76a7" />
+
 
 ---
 
