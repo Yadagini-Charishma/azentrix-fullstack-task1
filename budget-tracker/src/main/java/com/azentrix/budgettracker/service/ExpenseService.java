@@ -7,17 +7,17 @@ import java.util.Map;
 
 public interface ExpenseService {
 
-    Expense addExpense(Expense expense);
+    Expense addExpense(Expense expense, Long userId);
 
-    Expense updateExpense(Long id, Expense expense);
+    Expense updateExpense(Long id, Expense expense, Long userId);
 
-    void deleteExpense(Long id);
+    void deleteExpense(Long id, Long userId);
 
-    List<Expense> getAllExpenses();
+    List<Expense> getAllExpenses(Long userId);
 
-    Expense getExpenseById(Long id);
+    Expense getExpenseById(Long id, Long userId);
 
-    List<Expense> getExpensesByMonth(int year, int month);
+    List<Expense> getExpensesByMonth(int year, int month, Long userId);
 
-    Map<String, Object> getMonthlySummary(int year, int month);
+    Map<String, Object> getMonthlySummary(int year, int month, Long userId);
 }

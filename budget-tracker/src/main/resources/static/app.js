@@ -3,7 +3,43 @@ const API = 'http://localhost:8080/api/expenses';
 let barChartInstance = null;
 let pieChartInstance = null;
 
-// ── Show/Hide Sections ─────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+//  AUTH — Check login & Logout
+// ══════════════════════════════════════════════════════════════════
+async function checkAuth() {
+  try {
+    const res = await fetch('http://localhost:8080/api/auth/me', {
+      method: 'GET',
+      credentials: 'include'
+    });
+    if (!res.ok) {
+      window.location.replace('login.html');
+      return;
+    }
+    const data = await res.json();
+    document.getElementById('welcomeUser').textContent = '👤 ' + data.username;
+  } catch (e) {
+    window.location.replace('login.html');
+  }
+}
+
+async function doLogout() {
+  try {
+    await fetch('http://localhost:8080/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (e) {
+    // even if request fails, redirect to login
+  } finally {
+    window.location.replace('login.html');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SHOW / HIDE SECTIONS
+// ══════════════════════════════════════════════════════════════════
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -11,7 +47,9 @@ function showSection(id) {
   if (id === 'dashboard') loadDashboard();
 }
 
-// ── Toast Notification ─────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+//  TOAST NOTIFICATION
+// ══════════════════════════════════════════════════════════════════
 function showToast(msg, color = '#333') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -28,12 +66,18 @@ async function loadDashboard() {
   const month = document.getElementById('filterMonth').value;
 
   try {
-    const res  = await fetch(`${API}/summary?year=${year}&month=${month}`);
+    const res  = await fetch(`${API}/summary?year=${year}&month=${month}`, {
+      credentials: 'include'
+    });
+
+    if (res.status === 401) { window.location.replace('login.html'); return; }
+
     const data = await res.json();
 
     document.getElementById('totalIncome').textContent  = '₹' + data.totalIncome.toFixed(2);
     document.getElementById('totalExpense').textContent = '₹' + data.totalExpense.toFixed(2);
-    const bal = data.balance;
+
+    const bal   = data.balance;
     const balEl = document.getElementById('balance');
     balEl.textContent = '₹' + bal.toFixed(2);
     balEl.style.color = bal >= 0 ? '#34a853' : '#ea4335';
@@ -73,7 +117,6 @@ function drawPieChart(breakdown) {
   if (pieChartInstance) pieChartInstance.destroy();
   const labels = Object.keys(breakdown);
   const values = Object.values(breakdown);
-
   if (labels.length === 0) return;
 
   const colors = ['#1a73e8','#ea4335','#fbbc04','#34a853','#9c27b0',
@@ -102,7 +145,10 @@ function drawPieChart(breakdown) {
 // ══════════════════════════════════════════════════════════════════
 async function loadAllEntries() {
   try {
-    const res     = await fetch(API);
+    const res = await fetch(API, { credentials: 'include' });
+
+    if (res.status === 401) { window.location.replace('login.html'); return; }
+
     const entries = await res.json();
     const tbody   = document.getElementById('entriesBody');
     tbody.innerHTML = '';
@@ -125,7 +171,7 @@ async function loadAllEntries() {
         <td>${e.date}</td>
         <td>${e.note || '-'}</td>
         <td>
-          <button class="btn-edit"  onclick="editEntry(${e.id})">✏ Edit</button>
+          <button class="btn-edit"   onclick="editEntry(${e.id})">✏ Edit</button>
           <button class="btn-delete" onclick="deleteEntry(${e.id})">🗑 Delete</button>
         </td>`;
       tbody.appendChild(tr);
@@ -141,7 +187,7 @@ async function loadAllEntries() {
 async function submitForm(e) {
   e.preventDefault();
 
-  const id = document.getElementById('editId').value;
+  const id      = document.getElementById('editId').value;
   const payload = {
     title:    document.getElementById('title').value,
     amount:   parseFloat(document.getElementById('amount').value),
@@ -155,6 +201,7 @@ async function submitForm(e) {
     if (id) {
       await fetch(`${API}/${id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
@@ -162,6 +209,7 @@ async function submitForm(e) {
     } else {
       await fetch(API, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
@@ -176,8 +224,11 @@ async function submitForm(e) {
 
 async function editEntry(id) {
   try {
-    const res = await fetch(`${API}/${id}`);
-    const e   = await res.json();
+    const res = await fetch(`${API}/${id}`, { credentials: 'include' });
+
+    if (res.status === 401) { window.location.replace('login.html'); return; }
+
+    const e = await res.json();
 
     document.getElementById('editId').value   = e.id;
     document.getElementById('title').value    = e.title;
@@ -197,7 +248,10 @@ async function editEntry(id) {
 async function deleteEntry(id) {
   if (!confirm('Delete this entry?')) return;
   try {
-    await fetch(`${API}/${id}`, { method: 'DELETE' });
+    await fetch(`${API}/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
     showToast('Deleted!', '#ea4335');
     loadAllEntries();
   } catch (err) {
@@ -216,8 +270,12 @@ function resetForm() {
   document.getElementById('formTitle').textContent = 'Add New Entry';
 }
 
-// ── Set today's date as default ────────────────────────────────────
-window.onload = () => {
+// ══════════════════════════════════════════════════════════════════
+//  ON PAGE LOAD
+// ══════════════════════════════════════════════════════════════════
+window.onload = async () => {
+  await checkAuth();
+
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('date').value = today;
 

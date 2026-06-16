@@ -18,7 +18,7 @@ public class Expense {
     private Double amount;
 
     @Column(nullable = false)
-    private String type; // "INCOME" or "EXPENSE"
+    private String type;
 
     @Column(nullable = false)
     private String category;
@@ -28,19 +28,15 @@ public class Expense {
 
     private String note;
 
-    // ─── Constructors ───────────────────────────────────────────────
+    // ── Link each expense to a user ──────────────────────
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    // ─── Constructors ─────────────────────────────────────
     public Expense() {}
 
-    public Expense(String title, Double amount, String type, String category, LocalDate date, String note) {
-        this.title = title;
-        this.amount = amount;
-        this.type = type;
-        this.category = category;
-        this.date = date;
-        this.note = note;
-    }
-
-    // ─── Getters & Setters ───────────────────────────────────────────
+    // ─── Getters & Setters ────────────────────────────────
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -61,4 +57,7 @@ public class Expense {
 
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }

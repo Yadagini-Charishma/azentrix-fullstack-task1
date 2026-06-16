@@ -8,15 +8,23 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+	<script>
+	  // Redirect to login if not logged in
+	  fetch('http://localhost:8080/api/auth/me', { credentials: 'include' })
+	    .then(res => { if (!res.ok) window.location.href = 'login.html'; })
+	    .catch(() => window.location.href = 'login.html');
+	</script>
 
-<header>
-  <div class="logo">💰 Budget Tracker</div>
-  <nav>
-    <button onclick="showSection('dashboard')">Dashboard</button>
-    <button onclick="showSection('entries')">All Entries</button>
-    <button onclick="showSection('add')">+ Add Entry</button>
-  </nav>
-</header>
+	<header>
+	  <div class="logo">💰 Budget Tracker</div>
+	  <nav>
+	    <span id="welcomeUser" style="color:rgba(255,255,255,0.85);font-size:0.9rem;margin-right:8px;"></span>
+	    <button onclick="showSection('dashboard')">Dashboard</button>
+	    <button onclick="showSection('entries')">All Entries</button>
+	    <button onclick="showSection('add')">+ Add Entry</button>
+	    <button onclick="doLogout()" style="background:rgba(234,67,53,0.7);border-color:rgba(234,67,53,0.9);">🚪 Logout</button>
+	  </nav>
+	</header>
 
 <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
 <section id="dashboard" class="section active">
